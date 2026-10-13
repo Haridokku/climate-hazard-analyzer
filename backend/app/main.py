@@ -9,7 +9,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.db import client, db
 from app.rate_limit import limiter
 from app.routers.hazards import router
-
+from app.routers.geo import router as geo_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,7 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
-
+app.include_router(geo_router)
 
 @app.get("/api/health")
 async def health():
