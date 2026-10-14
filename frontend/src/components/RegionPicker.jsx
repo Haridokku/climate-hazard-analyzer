@@ -7,11 +7,19 @@ const labelCls = "mb-1 block text-xs font-semibold uppercase tracking-wide text-
 
 const placeLabel = (p) => [p.name, p.admin1, p.country].filter(Boolean).join(", ");
 
+function Spinner({ className = "" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white ${className}`}
+    />
+  );
+}
+
 export default function RegionPicker({
-  region, setRegion, startYear, endYear, setStartYear, setEndYear,
+  region, onSelect, query, setQuery, startYear, endYear, setStartYear, setEndYear,
   minYear, maxYear, onAnalyze, loading,
 }) {
-  const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
@@ -37,17 +45,25 @@ export default function RegionPicker({
   }
 
   function pick(place) {
-    setRegion({
+    const label = placeLabel(place);
+    onSelect({
       lat: String(place.lat),
       lon: String(place.lon),
-      label: placeLabel(place),
+      label,
       source: "search", // tells the map to fly to this point
+      query: label,     // show the full place name in the search box
     });
     setResults([]);
+    setSearchError("");
   }
 
   const setCoord = (key) => (e) =>
-    setRegion({ ...region, [key]: e.target.value, label: "Custom location", source: "manual" });
+    onSelect({
+      lat: key === "lat" ? e.target.value : region.lat,
+      lon: key === "lon" ? e.target.value : region.lon,
+      label: "Custom location",
+      source: "manual",
+    });
 
   return (
     <div className="space-y-5">
@@ -74,9 +90,9 @@ export default function RegionPicker({
           <button
             type="submit"
             disabled={searching || query.trim().length < 2}
-            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-w-24 items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {searching ? "…" : "Search"}
+            {searching ? <Spinner /> : "Search"}
           </button>
         </div>
         {searchError && <p className="mt-2 text-sm text-red-600">{searchError}</p>}
@@ -135,8 +151,10 @@ export default function RegionPicker({
         type="button"
         onClick={onAnalyze}
         disabled={loading}
-        className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-busy={loading}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-70"
       >
+        {loading && <Spinner />}
         {loading ? "Analyzing…" : "Analyze"}
       </button>
     </div>

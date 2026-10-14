@@ -35,7 +35,7 @@ function FlyTo({ lat, lon, enabled }) {
   return null;
 }
 
-export default function MapPicker({ region, setRegion }) {
+export default function MapPicker({ region, onPick }) {
   const lat = region.lat !== "" && Number.isFinite(Number(region.lat)) ? Number(region.lat) : null;
   const lon = region.lon !== "" && Number.isFinite(Number(region.lon)) ? Number(region.lon) : null;
   const hasPoint = lat !== null && lon !== null;
@@ -51,11 +51,7 @@ export default function MapPicker({ region, setRegion }) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <ClickHandler
-        onPick={(la, lo) =>
-          setRegion({ lat: la.toFixed(4), lon: lo.toFixed(4), label: "Selected on map", source: "map" })
-        }
-      />
+      <ClickHandler onPick={onPick} />
       <FlyTo lat={lat} lon={lon} enabled={region.source === "search"} />
       {hasPoint && <Marker position={[lat, lon]} />}
     </MapContainer>

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { getSummary, csvUrl, errorMessage } from "./api";
+import { getSummary, reverseGeocode, csvUrl, errorMessage } from "./api";
 import RegionPicker from "./components/RegionPicker";
 import MapPicker from "./components/MapPicker";
 import Charts from "./components/Charts";
@@ -8,6 +8,7 @@ import InsightCards from "./components/InsightCards";
 const MIN_YEAR = 1990;
 const MAX_YEAR = new Date().getFullYear() - 1; // the current year is incomplete
 const MIN_SPAN = 10;
+const LOCATING = "Locating…";
 
 function validate(region, startYear, endYear) {
   const lat = Number(region.lat);
@@ -28,6 +29,7 @@ export default function App() {
     label: "Hyderabad, Telangana, India",
     source: "manual",
   });
+  const [query, setQuery] = useState("Hyderabad, Telangana, India"); // text in the search box
   const [startYear, setStartYear] = useState(MIN_YEAR);
   const [endYear, setEndYear] = useState(MAX_YEAR);
   const [metric, setMetric] = useState("events");
@@ -37,6 +39,28 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const requestId = useRef(0);
+  const selection = useRef(0);
+
+  // every way of choosing a location goes through here (search, map click, typed coordinates)
+  function selectLocation({ lat, lon, label, source, query: text = "" }) {
+    selection.current += 1;
+    setRegion({ lat, lon, label, source });
+    setQuery(text);
+    return selection.current;
+  }
+
+  async function handleMapPick(lat, lon) {
+    const latStr = lat.toFixed(4);
+    const lonStr = lon.toFixed(4);
+    const id = selectLocation({ lat: latStr, lon: lonStr, label: LOCATING, source: "map" });
+
+    const place = await reverseGeocode(latStr, lonStr).catch(() => null);
+    if (id !== selection.current) return; // the user picked something else meanwhile
+
+    const name = place?.label || null;
+    setRegion((prev) => ({ ...prev, label: name || `Map point (${latStr}, ${lonStr})` }));
+    setQuery(name || "");
+  }
 
   async function handleAnalyze() {
     const problem = validate(region, startYear, endYear);
@@ -57,7 +81,7 @@ export default function App() {
       });
       if (id !== requestId.current) return;
       setData(result);
-      setAnalyzedLabel(region.label);
+      setAnalyzedLabel(region.label === LOCATING ? `${region.lat}°, ${region.lon}°` : region.label);
     } catch (err) {
       if (id === requestId.current) setError(errorMessage(err));
     } finally {
@@ -82,7 +106,9 @@ export default function App() {
             <h2 className="mb-4 text-lg font-semibold">Choose region and period</h2>
             <RegionPicker
               region={region}
-              setRegion={setRegion}
+              onSelect={selectLocation}
+              query={query}
+              setQuery={setQuery}
               startYear={startYear}
               endYear={endYear}
               setStartYear={setStartYear}
@@ -97,7 +123,7 @@ export default function App() {
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
             <h2 className="mb-1 text-lg font-semibold">Or click the map</h2>
             <p className="mb-3 text-sm text-slate-500">Click anywhere to set the location.</p>
-            <MapPicker region={region} setRegion={setRegion} />
+            <MapPicker region={region} onPick={handleMapPick} />
           </div>
         </section>
 

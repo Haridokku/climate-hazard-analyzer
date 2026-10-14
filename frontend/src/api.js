@@ -33,3 +33,6 @@ export const errorMessage = (err) => {
   if (err.code === "ECONNABORTED") return "The request timed out. Please try again.";
   return "Something went wrong. Please try again.";
 };
+
+export const reverseGeocode = (lat, lon) =>
+  api.get("/api/reverse-geocode", { params: { lat, lon } }).then((r) => r.data);
