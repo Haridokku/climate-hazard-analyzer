@@ -2,8 +2,8 @@
 
 A web app that analyzes historical weather data and shows how **heatwaves** have changed over time for a chosen location. Built as a case study for the Full-Stack Developer role at Dygnify Ventures.
 
-- **Live app:** TODO
-- **API docs (Swagger): TODO
+- **Live app:** https://climate-hazard-analyzer-in30g9evf.vercel.app
+- **API docs (Swagger):** https://climate-hazard-analyzer-yhir.onrender.com/docs
 
 
 ## Screenshots
@@ -209,7 +209,7 @@ VITE_API_URL=http://127.0.0.1:8000
 | `CORS_ORIGINS` | backend | Comma-separated allowed frontend origins |
 | `VITE_API_URL` | frontend | Backend base URL |
 
-**Note:** TODO (after deploying) The free Render instance sleeps after inactivity, so the first request can take about a minute. Some popular cities were pre-computed so they respond immediately. A new location is slower on first use, because it downloads and processes decades of data.
+**Note:** the free Render instance sleeps after inactivity, so the first request after a quiet period can take about a minute. Some popular Indian cities (Hyderabad, Delhi, Mumbai, Chennai, Bengaluru, Kolkata) were pre-computed, so they respond immediately. A new location is slower on first use, because it downloads and processes decades of data.
 
 ## Assumptions
 
@@ -244,7 +244,7 @@ VITE_API_URL=http://127.0.0.1:8000
 
 ## AI tools used
 
-TODO: edit so it is accurate. Example: I used Claude (Anthropic) as a pair-programming assistant to plan the architecture, draft the FastAPI, analysis and React code, review the statistical choices, and debug setup and deployment problems. I typed, ran and tested the code myself and can explain every part of it.
+I used Claude (Anthropic) as a pair-programming assistant to plan the architecture, draft the FastAPI, analysis and React code, review the statistical choices, and debug setup and deployment problems. I typed, ran and tested the code myself, and I can explain every part of it.
 
 ## Credits
 
